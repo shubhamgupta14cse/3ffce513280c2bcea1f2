@@ -17,8 +17,8 @@ function handleResponse(response) {
 };
 
 async function handleError(error) {
-  // console.log()
-  // return Promise.reject(error.response?.data?.errors[0]);
+  console.log("This is the error -------------> ", error)
+  return Promise.reject(error.message);
 }
 
 const countryInstance = axios.create({

@@ -22,9 +22,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: colors.white,
     padding: 10,
-    // paddingHorizontal: 40,
-    // width: '80%',
-    // height: '40%',
     marginVertical: 10
   },
   input: {
@@ -35,19 +32,21 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   weatherInfo: {
-    height: '40%',
-    width: '100%',
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+    backgroundColor: colors.white,
+    paddingVertical: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 });
 
 function Country({ navigation }) {
   const [isLoading, setIsLoading] = React.useState();
-  const [country, setCountry]= React.useState();
-  const [ weather, setWeatherData] = React.useState({});
+  const [ weather, setWeather] = React.useState({});
+  const [ firstTime, setFirstTime] =  React.useState(false);
 
   const countries  = navigation.getParam('countries');
 
@@ -55,40 +54,54 @@ function Country({ navigation }) {
     setIsLoading(true);
     weatherService
       .getWeather(capital)
-      .then(setWeather)
+      .then(weather => {
+        setWeather(weather);
+        setFirstTime(true);
+      })
       .catch(Toast.error)
       .finally(() => setIsLoading(false));
   };
 
   return (
-    <>
-    <ScrollView contentContainerStyle={styles.root}>
-      <StatusBar backgroundColor={colors.primaryBlue} barStyle='light-content' />
+    <View style={{ flex: 1, backgroundColor: colors.primaryBlue }}>
+      <ScrollView contentContainerStyle={styles.root}>
+        <StatusBar backgroundColor={colors.primaryBlue} barStyle='light-content' />
 
-      {
-        countries.map(({ name, capital, latlng, population, flag }) => (
-          <View style={styles.inputContainer}>
-            <Image source={flag} style={{ height: 50, width: 100 }}/>
-            <Text> Name - {name}</Text>
-            <Text> Capital - {capital}</Text>
-            <Text> Population - {population}</Text>
-            <Text> Latitude - {latlng[0]} </Text>
-            <Text> Longitude - {latlng[1]} </Text>
+        {
+          countries.map(({ name, capital, latlng, population, flag }) => (
+            <View style={styles.inputContainer}>
+              <Image source={flag} style={{ height: 50, width: 100 }}/>
+              <Text> Name - {name}</Text>
+              <Text> Capital - {capital}</Text>
+              <Text> Population - {population}</Text>
+              <Text> Latitude - {latlng[0]} </Text>
+              <Text> Longitude - {latlng[1]} </Text>
 
-            <View style={styles.buttonContainer}>
-              <Button isLoading={isLoading} onPress={() => handleSubmit(capital)} buttonTitle='Capital Weather' />
+              <View style={styles.buttonContainer}>
+                <Button isLoading={isLoading} onPress={() => handleSubmit(capital)} buttonTitle='Capital Weather' />
+              </View>
+
             </View>
-
+          ))
+        }
+      </ScrollView>
+      {
+        firstTime
+          ? (
+          <View style={styles.weatherInfo}>
+            <Text style={{ fontSize: 16 }}>Capitan name: {weather.name.substring(0, 25) + "..."}</Text>
+            <Text style={{ fontSize: 16 }}> country : {weather.country}</Text>
+            <Text style={{ fontSize: 12 }}> Temperature : {weather.temperature}</Text>
+            <Text style={{ fontSize: 12 }}> Wind speed : {weather.wind_speed}</Text>
+            <Text style={{ fontSize: 12 }}> Precip : {weather.precip}</Text>
           </View>
-        ))
+        ) : (
+          <View style={styles.weatherInfo}>
+            <Text> Select a country to view its state weather </Text>
+          </View>
+        )
       }
-    </ScrollView>
-    <View style={styles.weatherInfo}>
-      <Text> Temperature {weather.Temperature}</Text>
-      <Text> Wind speed {weather.wind_speed}</Text>
-      <Text> Precip {weather.precip}</Text>
     </View>
-    </>
   );
 }
 
